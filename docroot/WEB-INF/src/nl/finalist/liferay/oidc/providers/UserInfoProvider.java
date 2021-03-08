@@ -17,7 +17,7 @@ public class UserInfoProvider {
 	}
 
 	public String getUserName(Map<String, String> userInfo) {
-		return userInfo.get("preferred_username");
+		return userInfo.get("sub");
 	}
 
 	public String getMobile(Map<String, String> userInfo) {

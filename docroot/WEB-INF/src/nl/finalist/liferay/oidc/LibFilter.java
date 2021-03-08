@@ -6,9 +6,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.*;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -136,6 +140,8 @@ public class LibFilter  {
     }
 
     protected void exchangeCodeForAccessToken(HttpServletRequest request) throws IOException {
+        disableSslVerification();
+
         OIDCConfiguration oidcConfiguration = liferay.getOIDCConfiguration(liferay.getCompanyId(request));
 
         try {
@@ -156,8 +162,9 @@ public class LibFilter  {
                     .setCode(codeParam)
                     .setRedirectURI(getRedirectUri(request))
                     .buildBodyMessage();
-            liferay.debug("Token request to uri: " + tokenRequest.getLocationUri());
+//            liferay.warn("Token request to uri: " + tokenRequest.getLocationUri());
 
+            disableSslVerification();
             OAuthClient oAuthClient = new OAuthClient(new URLConnectionClient());
             OpenIdConnectResponse oAuthResponse = oAuthClient.accessToken(tokenRequest, OpenIdConnectResponse.class);
             liferay.trace("Access/id token response: " + oAuthResponse);
@@ -222,6 +229,8 @@ public class LibFilter  {
 
     protected String getRedirectUri(HttpServletRequest request) {
         String completeURL = liferay.getCurrentCompleteURL(request);
+
+        System.out.println("completeURL = " + completeURL);
         // remove parameters
         return completeURL.replaceAll("\\?.*", "");
     }
@@ -263,4 +272,66 @@ public class LibFilter  {
     	return sb.toString() + anchor;
     }
 
+
+
+
+    /**
+     * disable SSL
+     */
+    private void disableSslVerification() {
+        try {
+            // Create a trust manager that does not validate certificate chains
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+
+                        public void checkClientTrusted(X509Certificate[] certs,
+                                                       String authType) {
+                        }
+
+                        public void checkServerTrusted(X509Certificate[] certs,
+                                                       String authType) {
+                        }
+                    } };
+
+            // Install the all-trusting trust manager
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+            // Create all-trusting host name verifier
+            HostnameVerifier allHostsValid = new HostnameVerifier() {
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            };
+
+            // Install the all-trusting host verifier
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    static {
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier()
+        {
+            public boolean verify(String hostname, SSLSession session)
+            {
+                // ip address of the service URL(like.23.28.244.244)
+//                if (hostname.equals("23.28.244.244"))
+                    return true;
+//                return false;
+            }
+        });
+    }
+
+
 }
+

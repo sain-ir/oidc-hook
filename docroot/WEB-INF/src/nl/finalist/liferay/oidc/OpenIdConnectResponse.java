@@ -31,7 +31,11 @@ public class OpenIdConnectResponse extends OAuthJSONAccessTokenResponse {
 
     @Override
     protected void init(String body, String contentType, int responseCode)
+
             throws OAuthProblemException {
+
+        System.out.println("body = " + body);
+
         super.init(body, contentType, responseCode);
         idToken = new JWTReader().read(getParam("id_token"));
     }
