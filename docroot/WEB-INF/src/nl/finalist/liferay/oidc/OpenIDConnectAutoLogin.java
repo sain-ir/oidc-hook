@@ -23,7 +23,6 @@ public class OpenIDConnectAutoLogin implements AutoLogin {
 
     @Override
     public String[] login(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws AutoLoginException {
-        System.out.println("HHERE 1111111111111111");
         libAutologin = new LibAutoLogin(new Liferay62Adapter());
 
         return libAutologin.doLogin(httpServletRequest, httpServletResponse);

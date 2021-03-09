@@ -13,8 +13,6 @@ public class ProviderFactory {
 	    UserInfoProvider openIdProvider;
 
 
-		System.out.println("providerType = " + providerType);
-
 		String s = providerType.toUpperCase();
 
 		if (s.equals("AZURE")) {
