@@ -23,7 +23,7 @@ public class LibAutoLogin {
 
     public LibAutoLogin(LiferayAdapter liferay) {
         this.liferay = liferay;
-        liferay.info("Initialized LibAutoLogin with Liferay API: " + liferay.getClass().getName());
+        liferay.debug("Initialized LibAutoLogin with Liferay API: " + liferay.getClass().getName());
     }
 
     public String[] doLogin(HttpServletRequest request, HttpServletResponse response) {
@@ -42,7 +42,7 @@ public class LibAutoLogin {
 
              if (userInfo == null) {
                  // Normal flow, apparently no current OpenID conversation
-                 liferay.warn("No current OpenID Connect conversation, no auto login");
+                 liferay.debug("No current OpenID Connect conversation, no auto login");
              } else if (StringUtils.isBlank(provider.getUserName(userInfo))) {
                  liferay.error("Unexpected: OpenID Connect UserInfo does not contain user name field. " +
                          "Cannot correlate to Liferay user. UserInfo: " + userInfo);
