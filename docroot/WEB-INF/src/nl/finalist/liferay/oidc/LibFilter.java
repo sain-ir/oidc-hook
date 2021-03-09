@@ -85,9 +85,11 @@ public class LibFilter  {
 
         OIDCConfiguration oidcConfiguration = liferay.getOIDCConfiguration(liferay.getCompanyId(request));
 
+        System.out.println("request.getServerName() = " + request.getServerName());
+
         // If the plugin is not enabled, short circuit immediately
-        if (!oidcConfiguration.isEnabled()) {
-            liferay.trace("OpenIDConnectFilter not enabled for this virtual instance. Will skip it.");
+        if (!oidcConfiguration.isEnabled() || !request.getServerName().contains("ssopilot.scu.ac.ir")) {
+            liferay.warn("OpenIDConnectFilter not enabled for this virtual instance. Will skip it.");
             return FilterResult.CONTINUE_CHAIN;
         }
 
